@@ -8,14 +8,16 @@ A Spring Boot based hospital management application for handling patients, docto
 - Security: High-severity CVE remediation has been applied.
 
 ## What Has Been Completed
-- Core modules for patient, doctor, staff, prescription, inventory, and supplier management.
-- Authentication and authorization with Spring Security.
-- Web UI with Thymeleaf templates.
-- REST API controllers for key entities.
-- H2 in-memory database setup for local development.
-- Dependency security update: `com.mysql:mysql-connector-j` updated to `9.1.0`.
-- Spring Boot baseline upgraded to `3.4.3`.
-- Application start/run verified at `http://localhost:8080/hospital/`.
+*   **Core Functional Modules**: Comprehensive management system for Patients, Doctors, Staff, Appointments, Prescriptions, Inventory, and Suppliers.
+*   **Security Implementation**: Robust authentication and Role-Based Access Control (RBAC) using Spring Security with BCrypt password hashing.
+*   **Dual Interface Layer**: Fully functional Web UI using Thymeleaf templates alongside a suite of REST API endpoints for programmatic access.
+*   **Data Persistence**: Optimized Spring Data JPA and Hibernate integration, utilizing an H2 in-memory database for rapid local development.
+*   **Security & Maintenance Hardening**:
+    *   Proactive remediation of high-severity dependency vulnerabilities.
+    *   Updated `com.mysql:mysql-connector-j` to `9.1.0` and upgraded the Spring Boot baseline to `3.4.3`.
+    *   Validated end-to-end run flow in local environments.
+*   **Project Optimization**: Completed a major repository cleanup (March 2026), removing 150MB+ of build artifacts and temporary files (98.5% size reduction) and archiving 78 historical documents for better maintainability.
+*   **Enhanced Documentation**: Added clear onboarding summaries, skill maps, and a future enhancement roadmap.
 
 ## Tech Stack
 - Java 17+
@@ -69,135 +71,280 @@ Main config file: `src/main/resources/application.properties`
 - The repository includes many archived documents under `archived_md_files/`.
 - The files listed above are the current concise guides for day-to-day development.
 
-## Docker & Cloud Deployment
+## Cloud Deployment (AWS)
 
-This project can be containerized and deployed to Google Cloud Platform (GCP) using Cloud Run or Compute Engine. A `Dockerfile` and `cloudbuild.yaml` have been added to support building the image.
+This application is deployed on AWS using the following infrastructure:
 
-### Building the Docker image locally
+### Architecture
 
-```bash
-# build the Maven package and create container image
-docker build -t hospital-management-system:latest .
+User Browser
+↓
+AWS EC2 (Ubuntu Server)
+↓
+Spring Boot Application
+↓
+AWS RDS (MySQL Database)
 
-# run the container on your machine (port is forwarded automatically)
-docker run --rm -p 8080:8080 \
-  -e PORT=8080 \
-  hospital-management-system:latest
+---
+
+# Live Application
+
+Application URL
+
+http://54.159.20.178:8080/hospital
+
+Login page
+
+http://54.159.20.178:8080/hospital/auth/login
+
+---
+
+# End-to-End Deployment Procedure
+
+The following steps describe how the application was deployed to AWS.
+
+---
+
+## 1. Push Code to GitHub
+
+Initialize git repository
+
+```
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/nithineleti/hospital-management-system.git
+git push -u origin main
 ```
 
-After the container starts you can access the app at `http://localhost:8080/hospital/`.
+---
 
-### Publishing to Google Container Registry and deploying to Cloud Run
+## 2. Create EC2 Instance
 
-1. Authenticate with GCP and set your project ID:
-   ```bash
-   gcloud auth login
-   gcloud config set project YOUR_PROJECT_ID
-   ```
-2. Build and push the image:
-   ```bash
-   docker build -t gcr.io/$GOOGLE_CLOUD_PROJECT/hospital-management-system:latest .
-   docker push gcr.io/$GOOGLE_CLOUD_PROJECT/hospital-management-system:latest
-   ```
-   Alternatively use Cloud Build:
-   ```bash
-   gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/hospital-management-system
-   ```
-3. Deploy to Cloud Run:
-   ```bash
-   gcloud run deploy hospital-management-system \
-     --image gcr.io/$GOOGLE_CLOUD_PROJECT/hospital-management-system:latest \
-     --platform managed --region us-central1 \
-     --allow-unauthenticated --port 8080
-   ```
+Create an instance using:
 
-The service URL will be printed after deployment; open it in your browser.
+* OS: Ubuntu
+* Instance Type: t3.micro
+* Storage: 8GB
 
-> **Note:** `server.port` in `application.properties` is now configured as `\${PORT:8080}` so Cloud Run can assign the port dynamically.
+Security Group Rules
 
-### Using Cloud Build
+| Type       | Port | Purpose                 |
+| ---------- | ---- | ----------------------- |
+| SSH        | 22   | Server access           |
+| HTTP       | 80   | Web access              |
+| Custom TCP | 8080 | Spring Boot application |
 
-A `cloudbuild.yaml` file is provided for automated builds:
+---
 
-```yaml
-steps:
-  - name: 'gcr.io/cloud-builders/mvn'
-    args: ['clean','package','-DskipTests']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build','-t','gcr.io/$PROJECT_ID/hospital-management-system','.',]
-images:
-  - 'gcr.io/$PROJECT_ID/hospital-management-system'
+## 3. Connect to EC2 Server
+
+Download key pair and connect using SSH
+
+```
+chmod 400 hospital-key.pem
+
+ssh -i hospital-key.pem ubuntu@54.159.20.178
 ```
 
-To trigger a build manually:
-```bash
-gcloud builds submit --config cloudbuild.yaml .
+---
+
+## 4. Install Required Software
+
+Update server
+
+```
+sudo apt update
 ```
 
-### Connecting to a Cloud SQL database
+Install Java
 
-If you deploy on Google Cloud Run (or another container service) you'll likely want a persistent database rather than the in‑memory H2 instance.
-A common pattern is to use **Cloud SQL (MySQL)** and connect via the Cloud SQL Auth proxy or the native socket support.
-
-1. **Create a Cloud SQL instance** (MySQL 8 or later) in your GCP project.
-2. **Enable the Cloud SQL Admin API** and grant the service account used by Cloud Run access to the instance.
-3. **Add the Cloud SQL Auth proxy** to your container or use the built‑in connector.  For example, with the proxy:
-   ```dockerfile
-   # in your Dockerfile add before ENTRYPOINT
-   COPY cloud_sql_proxy /cloud_sql_proxy
-   ENTRYPOINT ["/cloud_sql_proxy","-instances=$CLOUD_SQL_CONNECTION_NAME=tcp:3306","&&","java","-jar","app.war"]
-   ```
-   or run the proxy alongside the container with `docker run --network`.
-4. **Set environment variables** when you deploy:
-   ```bash
-   gcloud run deploy hospital-management-system \
-     --image gcr.io/$GOOGLE_CLOUD_PROJECT/hospital-management-system:latest \
-     --update-env-vars \
-       SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3306/hospital_db,\
-       SPRING_DATASOURCE_USERNAME=root,\
-       SPRING_DATASOURCE_PASSWORD=secret,\
-       CLOUD_SQL_CONNECTION_NAME=your-project:region:instance
-   ```
-   adjust the URL if using the native socket (e.g. `jdbc:mysql:///<DB_NAME>?socket=/cloudsql/$CLOUD_SQL_CONNECTION_NAME`).
-
-The application properties default to H2 but will honour the `SPRING_DATASOURCE_*` environment variables above.
-
-### Automating build & deploy
-
-You can trigger builds automatically on commits by hooking the repository to Cloud Build (via the GCP console or `gcloud beta builds triggers create`).  A simple trigger configuration would run the `cloudbuild.yaml` in this repo on every push to `main` and then deploy the resulting image to Cloud Run using a `gcloud run deploy` step.
-
-Example `cloudbuild.yaml` with a deploy step:
-```yaml
-steps:
-  - name: 'gcr.io/cloud-builders/mvn'
-    args: ['clean','package','-DskipTests']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build','-t','gcr.io/$PROJECT_ID/hospital-management-system','.',]
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push','gcr.io/$PROJECT_ID/hospital-management-system']
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy hospital-management-system \
-          --image gcr.io/$PROJECT_ID/hospital-management-system:latest \
-          --region us-central1 --platform managed \
-          --allow-unauthenticated
-images:
-  - 'gcr.io/$PROJECT_ID/hospital-management-system'
+```
+sudo apt install openjdk-17-jdk -y
 ```
 
-Once the trigger is configured, every push to `main` will build the image and roll out a new revision of the Cloud Run service.
+Verify Java
 
-### Notes
+```
+java -version
+```
 
-- Ensure the appropriate database (MySQL/Cloud SQL) is accessible from the container. For Cloud Run, you can connect to Cloud SQL using the Cloud SQL Auth proxy or the native connector.
-- Adjust any environment-specific configuration via environment variables or a Spring profile.
+Install Maven
 
-For further details on Google Cloud deployment, consult the GCP documentation.
+```
+sudo apt install maven -y
+```
 
-> After cloning you can make the helper script executable:
-> ```bash
-> chmod +x deploy.sh
-> ```
+Verify Maven
+
+```
+mvn -version
+```
+
+Install Git
+
+```
+sudo apt install git -y
+```
+
+---
+
+## 5. Clone Project on Server
+
+```
+git clone https://github.com/nithineleti/hospital-management-system.git
+
+cd hospital-management-system
+```
+
+Verify files
+
+```
+ls
+```
+
+---
+
+## 6. Configure AWS RDS Database
+
+Create a MySQL instance in AWS RDS.
+
+Database configuration example
+
+```
+Database Name: hospital_db
+Username: admin
+Port: 3306
+```
+
+Update application configuration
+
+File
+
+```
+src/main/resources/application.properties
+```
+
+Example configuration
+
+```
+spring.datasource.url=jdbc:mysql://RDS_ENDPOINT:3306/hospital_db
+spring.datasource.username=admin
+spring.datasource.password=YOUR_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+---
+
+## 7. Allow EC2 to Access RDS
+
+Open the RDS security group.
+
+Add inbound rule:
+
+| Type  | Port | Source    |
+| ----- | ---- | --------- |
+| MySQL | 3306 | 0.0.0.0/0 |
+
+---
+
+## 8. Build Application
+
+Run the Maven build command
+
+```
+mvn clean install -DskipTests
+```
+
+Expected result
+
+```
+BUILD SUCCESS
+```
+
+---
+
+## 9. Run Spring Boot Application
+
+Start the application
+
+```
+mvn spring-boot:run
+```
+
+Application starts on
+
+```
+Tomcat started on port(s): 8080
+```
+
+---
+
+## 10. Access the Application
+
+Open browser
+
+```
+http://54.159.20.178:8080/hospital
+```
+
+Dashboard will load.
+
+---
+
+# Database Query Examples
+
+Example queries used for verification.
+
+Create database
+
+```
+CREATE DATABASE hospital_db;
+```
+
+View tables
+
+```
+SHOW TABLES;
+```
+
+Check users
+
+```
+SELECT user, host FROM mysql.user;
+```
+
+Check patient records
+
+```
+SELECT * FROM patient;
+```
+
+Check doctors
+
+```
+SELECT * FROM doctor;
+```
+
+---
+
+# Production Improvements
+
+Future enhancements include:
+
+* Nginx reverse proxy
+* Docker containerization
+* Cloudflare CDN
+* CI/CD pipeline using GitHub Actions
+* HTTPS with Let's Encrypt
+
+---
+
+# Author
+
+Nithin Neleti
+
+GitHub
+https://github.com/nithineleti
