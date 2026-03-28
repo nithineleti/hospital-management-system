@@ -8,7 +8,10 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 /**
  * Main entry point for the Hospital Management System application
  */
+import org.springframework.scheduling.annotation.EnableAsync;
+
 @SpringBootApplication
+@EnableAsync
 @EnableJpaRepositories(basePackages = "com.hospital.repository")
 @EntityScan(basePackages = "com.hospital.model")
 public class HospitalManagementApplication {

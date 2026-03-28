@@ -319,7 +319,7 @@
                     <label for="remember">Remember me</label>
                 </div>
 
-                <button type="submit" class="login-btn">
+                <button type="submit" class="login-btn" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
@@ -329,5 +329,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+      // Auto-fill saved credentials silently (no confirm dialog)
+      (function() {
+        try {
+          const saved = localStorage.getItem('hospitalUser');
+          if (saved) {
+            const user = JSON.parse(saved);
+            document.getElementById('username').value = user.username || '';
+            document.getElementById('password').value = user.password || '';
+          }
+        } catch(e) {
+          localStorage.removeItem('hospitalUser');
+        }
+      })();
+    </script>
 </body>
 </html>

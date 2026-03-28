@@ -1,0 +1,5 @@
+- [x] Step 1: Complete AiService.java (add HttpClient, generateResponse method, close class)
+- [x] Step 2: Complete AiController.java (complete chat method with SSE, close class)
+- [x] Step 3: Verify `mvn clean compile -DskipTests` succeeds
+- [x] Step 4: Run `./run.sh` and confirm startup
+- [x] Step 5: Test AI endpoint

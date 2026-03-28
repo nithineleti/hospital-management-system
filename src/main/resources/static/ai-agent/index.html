@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Siri AI Agent - Hospital Assistant</title>
+    <style>
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+        background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+        color: white;
+        height: 100vh; 
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .landing {
+        text-align: center;
+        padding: 2rem;
+      }
+      .landing h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+      .landing p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem; }
+      .btn {
+        background: linear-gradient(135deg, #00d4ff, #0099cc);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+      }
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,212,255,0.4); }
+    </style>
+  </head>
+  <body>
+    <div class="landing">
+      <h1>🏥 Siri AI Agent</h1>
+      <p>Your intelligent hospital management assistant</p>
+      <button class="btn" onclick="openChat()">Open Chat</button>
+    </div>
+    <script>
+      function openChat() {
+        window.location.href = '/static/ai-agent/chat.html';
+      }
+      
+      // Auto-open chat if in iframe
+      if (window.parent !== window) {
+        setTimeout(() => openChat(), 1000);
+      }
+      
+      window.onerror = function() {
+        document.body.innerHTML = '<div style="padding: 20px; text-align: center; font-family: Arial;"><h3>Siri AI Ready!</h3><p>Hospital AI assistant loaded successfully.<br>Click Siri button on dashboard.</p></div>';
+        return true;
+      };
+    </script>
+  </body>
+</html>

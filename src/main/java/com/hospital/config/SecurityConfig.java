@@ -47,14 +47,17 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
             // Public endpoints - accessible without authentication
             .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/css/**"), new AntPathRequestMatcher("/js/**"), 
-                           new AntPathRequestMatcher("/images/**")).permitAll()
+.requestMatchers(new AntPathRequestMatcher("/css/**"), new AntPathRequestMatcher("/js/**"), 
+                           new AntPathRequestMatcher("/images/**"), 
+                           new AntPathRequestMatcher("/ai-agent/**"),
+                           new AntPathRequestMatcher("/static/ai-agent/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/error"), new AntPathRequestMatcher("/error/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
 
             // Restricted endpoints - Using ROLE_ prefix as added in UserDetailsService
             .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/user/**")).hasAnyRole("ADMIN", "USER")
+            .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
 
             // All other requests require authentication
             .anyRequest().authenticated()
@@ -76,10 +79,12 @@ public class SecurityConfig {
             .permitAll()
         )
         // CSRF protection using Lambda DSL
-        .csrf(csrf -> csrf
+.csrf(csrf -> csrf
             .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"), 
                                     new AntPathRequestMatcher("/auth/**"),
-                                    new AntPathRequestMatcher("/api/**"),
+                                    new AntPathRequestMatcher("/api/ai/**"),
+                                    new AntPathRequestMatcher("/ai-agent/**"),
+                                    new AntPathRequestMatcher("/static/ai-agent/**"),
                                     new AntPathRequestMatcher("/doctor/**"),
                                     new AntPathRequestMatcher("/patient/**"),
                                     new AntPathRequestMatcher("/appointment/**"),

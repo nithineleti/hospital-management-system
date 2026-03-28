@@ -413,6 +413,28 @@
                 </button>
             </form>
 
+            <!-- Auto-save registration details -->
+            <script>
+              document.querySelector('form').addEventListener('submit', function(e) {
+                const formData = new FormData(this);
+                const user = {
+                  username: formData.get('username'),
+                  password: formData.get('password'),
+                  email: formData.get('email')
+                };
+                localStorage.setItem('hospitalUser', JSON.stringify(user));
+                console.log('✅ Registration details saved for auto-login');
+              });
+
+              // Success message handler
+              if (window.location.search.includes('success')) {
+                const saved = localStorage.getItem('hospitalUser');
+                if (saved) {
+                  alert('Registration saved! You can now login with saved credentials.');
+                }
+              }
+            </script>
+
             <div class="link-section">
                 <p>Already have an account? <a href="/hospital/auth/login">Login here</a></p>
             </div>

@@ -1,0 +1,4 @@
+- [x] Create/reset users in DataInitializerService
+- [x] Restart app (devtools auto-restart)
+- [x] Test login: nithin / 123456Np (ADMIN)
+- [x] Verify /auth/register works

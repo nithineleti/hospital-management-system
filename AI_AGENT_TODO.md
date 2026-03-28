@@ -1,0 +1,1 @@
+- [x] Step 1: Complete src/main/resources/static/ai-agent/chat.html (full chat UI/JS connecting /api/ai/chat SSE)&#10;- [x] Step 2: Fix ai-widget.js iframe src to chat.html
