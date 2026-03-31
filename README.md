@@ -348,3 +348,50 @@ Nithin Neleti
 
 GitHub
 https://github.com/nithineleti
+
+
+User -- Pious
+password -- 149208914@Np
+
+## Recent Updates
+
+### Dockerization
+- Added a `Dockerfile` to containerize the application.
+- Built and ran the Docker container successfully.
+- Port mapping: Host `8081` -> Container `8080`.
+- Application accessible at `http://localhost:8081/hospital`.
+
+### Troubleshooting Steps
+- Resolved issues with port conflicts and container name conflicts during Docker runtime.
+- Verified application logs to ensure proper startup.
+- Adjusted context path to `/hospital` as defined in `application.properties`.
+
+### Local and Docker Run Instructions
+
+#### Local Run
+1. Build the project:
+   ```bash
+   ./mvnw clean package
+   ```
+2. Run the application:
+   ```bash
+   java -jar target/hospital-management-system.jar
+   ```
+3. Access the application at:
+   ```
+   http://localhost:8080/hospital
+   ```
+
+#### Docker Run
+1. Build the Docker image:
+   ```bash
+   docker build -t hospital-management-system .
+   ```
+2. Run the Docker container:
+   ```bash
+   docker run -d -p 8081:8080 --name hospital-management-system hospital-management-system
+   ```
+3. Access the application at:
+   ```
+   http://localhost:8081/hospital
+   ```

@@ -51,7 +51,8 @@ public class SecurityConfig {
                            new AntPathRequestMatcher("/images/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/error"), new AntPathRequestMatcher("/error/**")).permitAll()
             .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-
+            .requestMatchers(new AntPathRequestMatcher("/hospital/api/siri/**"), new AntPathRequestMatcher("/api/siri/**"), new AntPathRequestMatcher("/hospital/api/**"), new AntPathRequestMatcher("/api/**")).permitAll()
+            
             // Restricted endpoints - Using ROLE_ prefix as added in UserDetailsService
             .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
             .requestMatchers(new AntPathRequestMatcher("/user/**")).hasAnyRole("ADMIN", "USER")

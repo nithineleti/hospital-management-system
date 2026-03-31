@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>SIRI Agent</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .container { max-width: 800px; margin: auto; }
+        textarea, input { width: 100%; padding: 10px; margin: 8px 0; }
+        button { padding: 10px 16px; }
+        .answer { border: 1px solid #ccc; padding: 12px; background: #f3f3f3; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${agentName} + ' AI Agent'">SIRI AI Agent</h2>
+    <p>Ask SIRI a hospital question, for example "List doctors" or "Find patient John".</p>
+
+    <textarea id="inputText" rows="3" placeholder="Enter your request here..."></textarea>
+
+    <button id="sendBtn">Ask SIRI</button>
+    <button id="voiceBtn">🎙️ Voice Input</button>
+
+    <h3>Agent reply</h3>
+    <div id="reply" class="answer">No response yet.</div>
+</div>
+
+<script>
+const replyDiv = document.getElementById('reply');
+const inputText = document.getElementById('inputText');
+
+async function askSiri() {
+    const text = inputText.value.trim();
+    if (!text) {
+        replyDiv.textContent = 'Please enter a request.';
+        return;
+    }
+
+    replyDiv.textContent = 'Waiting for SIRI...';
+
+    const res = await fetch('/hospital/api/siri/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    });
+
+    if (!res.ok) {
+        replyDiv.textContent = 'Error: ' + res.status + ' ' + res.statusText;
+        return;
+    }
+
+    const data = await res.json();
+    replyDiv.textContent = data.reply || 'No reply.';
+
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(data.reply || 'No reply.');
+        utterance.rate = 1;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+async function startVoice() {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert('Voice recognition not supported in this browser.');
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+        inputText.value = event.results[0][0].transcript;
+        askSiri();
+    };
+
+    recognition.onerror = (event) => {
+        replyDiv.textContent = 'Voice error: ' + event.error;
+    };
+
+    recognition.start();
+}
+
+document.getElementById('sendBtn').addEventListener('click', askSiri);
+document.getElementById('voiceBtn').addEventListener('click', startVoice);
+</script>
+</body>
+</html>

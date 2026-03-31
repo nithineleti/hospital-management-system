@@ -57,7 +57,19 @@ public class DoctorService {
         return doctorRepository.findByStatus(status);
     }
 
+    public List<Doctor> getDoctorsByLastName(String lastName) {
+        return doctorRepository.findByLastNameContainingIgnoreCase(lastName);
+    }
+
+    public List<Doctor> getDoctorsByFirstName(String firstName) {
+        return doctorRepository.findByFirstNameContainingIgnoreCase(firstName);
+    }
+
     public List<Doctor> searchDoctorByFirstName(String firstName) {
         return doctorRepository.findByFirstNameContainingIgnoreCase(firstName);
+    }
+
+    public List<Doctor> searchDoctorByLastName(String lastName) {
+        return doctorRepository.findByLastNameContainingIgnoreCase(lastName);
     }
 }

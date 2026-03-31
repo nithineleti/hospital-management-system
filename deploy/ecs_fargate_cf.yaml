@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Fargate service for Hospital Management System
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  PublicSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  DBUsername:
+    Type: String
+  DBPassword:
+    Type: String
+  DBName:
+    Type: String
+  DBAllocatedStorage:
+    Type: Number
+    Default: 20
+Resources:
+  HospitalDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref DBName
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      VPCSecurityGroups: []
+  HospitalECRRepo:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: hospital-management-system
+  HospitalCluster:
+    Type: AWS::ECS::Cluster
+  HospitalTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      ContainerDefinitions:
+        - Name: hospital-app
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/hospital-management-system:latest"
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: SPRING_DATASOURCE_URL
+              Value: !Sub "jdbc:mysql://${HospitalDB.Endpoint.Address}:3306/${DBName}?useSSL=false&serverTimezone=UTC"
+            - Name: SPRING_DATASOURCE_USERNAME
+              Value: !Ref DBUsername
+            - Name: SPRING_DATASOURCE_PASSWORD
+              Value: !Ref DBPassword
+  HospitalService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref HospitalCluster
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref HospitalTaskDef
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref PublicSubnets

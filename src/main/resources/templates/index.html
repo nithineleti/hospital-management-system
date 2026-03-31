@@ -500,37 +500,141 @@
             margin: 0.5rem 0;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8rem;
-            }
+        /* SIRI AI Floating Button */
+        .siri-float-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d4ff, #00f5a0);
+            color: #0f1419;
+            border-radius: 50px;
+            padding: 0.75rem 1.1rem;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 500;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 0;
+            font-size: 0.95rem;
+        }
 
-            .header p {
-                font-size: 1rem;
-            }
+        .siri-float-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+        }
 
-            .nav-buttons {
-                flex-direction: column;
-            }
+        /* SIRI AI Dashboard */
+        .siri-ai-dashboard {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 460px;
+            max-height: 80vh;
+            background: rgba(12, 17, 30, 0.96);
+            color: #e0e0e0;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+            z-index: 510;
+            display: none;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
 
-            .nav-btn {
-                width: 100%;
-                justify-content: center;
-            }
+        .siri-ai-dashboard.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
+        .siri-ai-dashboard .dashboard-header {
+            padding: 0.8rem 1rem;
+            background: rgba(4, 21, 43, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.25);
+        }
 
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
+        .siri-ai-dashboard .dashboard-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #00d4ff;
+        }
 
-            .navbar-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        .siri-ai-dashboard .dashboard-header .siri-badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00f5a0;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            margin-left: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .siri-ai-dashboard .close-btn {
+            background: transparent;
+            border: none;
+            color: #f8f9fa;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .siri-ai-dashboard .siri-chat-section {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin: 0.7rem 1rem;
+        }
+
+        .siri-ai-dashboard .siri-chat-section textarea {
+            width: 100%;
+            height: 70px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.21);
+            color: #e8f8ff;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+
+        .siri-chat-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .siri-chat-actions button {
+            background: rgba(0, 212, 255, 0.9);
+            color: #0f1419;
+            border: none;
+            border-radius: 7px;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .ai-response {
+            margin-top: 0.6rem;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(0, 212, 255, 0.22);
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-height: 60px;
+            color: #d3f4ff;
+            white-space: pre-wrap;
         }
 
         /* Loading animation */
@@ -778,6 +882,49 @@
             </div>
         </div>
 
+        <!-- SIRI AI floating activation button -->
+        <div id="siri-float-button" class="siri-float-button" title="Open SIRI AI Dashboard">
+            <i class="fas fa-robot"></i><span>SIRI AI</span>
+        </div>
+
+        <!-- SIRI AI interactive dashboard modal -->
+        <div id="siri-ai-dashboard" class="siri-ai-dashboard">
+            <div class="dashboard-header">
+                <h3>SIRI AI Interactive Dashboard</h3>
+                <span class="siri-badge" id="siri-status-badge">Offline</span>
+                <button id="siri-dashboard-close" class="close-btn">✕</button>
+            </div>
+
+            <!-- SIRI AI chat area -->
+            <div class="siri-chat-section">
+                <textarea id="ai-input" placeholder="Ask SIRI anything..."></textarea>
+                <div class="siri-chat-actions">
+                    <button id="ai-submit">Ask</button>
+                    <button id="ai-voice">Voice</button>
+                </div>
+                <div id="ai-response" class="ai-response">SIRI reply appears here.</div>
+            </div>
+
+            <div class="dashboard-controls">
+                <label for="entity-type">View:</label>
+                <select id="entity-type">
+                    <option value="patients">Patients</option>
+                    <option value="doctors">Doctors</option>
+                    <option value="staff">Staff</option>
+                    <option value="appointments">Appointments</option>
+                </select>
+                <input id="entity-search" type="text" placeholder="Search by name, id, phone..." />
+                <button id="entity-refresh">Refresh</button>
+            </div>
+
+            <div id="dashboard-content" class="dashboard-content"></div>
+
+            <div class="dashboard-footer">
+                <button id="download-details" class="download-btn">Download Selected Record</button>
+                <span id="dashboard-notice" class="notice">Select a row to enable download/call actions.</span>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="footer">
             <p><i class="fas fa-copyright"></i> 2026 Hospital Management System. All Rights Reserved.</p>
@@ -998,6 +1145,259 @@
                 this.style.borderColor = 'rgba(0, 212, 255, 0.2)';
             });
         });
+
+        // --- SIRI AI Agent Script ---
+        const aiSubmitBtn = document.getElementById('ai-submit');
+        const aiVoiceBtn = document.getElementById('ai-voice');
+
+        function getAiEndpoint() {
+            return window.location.pathname.startsWith('/hospital') ? '/hospital/api/ai/ask' : '/api/ai/ask';
+        }
+
+        function updateAiResponse(text) {
+            const responseDiv = document.getElementById('ai-response');
+            responseDiv.textContent = text;
+            if ('speechSynthesis' in window && text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function askSiri() {
+            const userInput = document.getElementById('ai-input').value;
+            if (!userInput.trim()) {
+                updateAiResponse('Please enter a question.');
+                return;
+            }
+
+            updateAiResponse('Thinking...');
+            fetch(getAiEndpoint(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: userInput })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Server responded with status ' + response.status);
+                return response.json();
+            })
+            .then(data => updateAiResponse(data.answer || 'No answer from SIRI.'))
+            .catch(error => updateAiResponse('Oops! Something went wrong: ' + error.message));
+        }
+
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                updateAiResponse('Voice not supported in this browser.');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => updateAiResponse('Listening...');
+            recognition.onerror = (event) => updateAiResponse('Voice error: ' + event.error);
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('ai-input').value = transcript;
+                askSiri();
+            };
+            recognition.start();
+        }
+
+        aiSubmitBtn.addEventListener('click', askSiri);
+        aiVoiceBtn.addEventListener('click', startVoiceRecognition);
+
+        // SIRI AI Dashboard functionality
+        const siriFloatButton = document.getElementById('siri-float-button');
+        const siriDashboard = document.getElementById('siri-ai-dashboard');
+        const siriDashboardClose = document.getElementById('siri-dashboard-close');
+        const entityType = document.getElementById('entity-type');
+        const entitySearch = document.getElementById('entity-search');
+        const entityRefresh = document.getElementById('entity-refresh');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const downloadDetailsBtn = document.getElementById('download-details');
+        const dashboardNotice = document.getElementById('dashboard-notice');
+
+        let dashboardDataCache = {};
+        let selectedEntity = null;
+
+        function getDashboardDataEndpoint() {
+            return window.location.pathname.startsWith('/hospital') ? '/hospital/api/ai/dashboard' : '/api/ai/dashboard';
+        }
+
+        function getEntityDetailsEndpoint(type, id) {
+            return window.location.pathname.startsWith('/hospital')
+                ? `/hospital/api/ai/entity/${type}/${id}`
+                : `/api/ai/entity/${type}/${id}`;
+        }
+
+        function fetchDashboardData() {
+            dashboardContent.innerHTML = '<p style="color: #00d4ff;">Loading data...</p>';
+            fetch(getDashboardDataEndpoint())
+                .then(response => response.ok ? response.json() : Promise.reject('Status ' + response.status))
+                .then(data => {
+                    dashboardDataCache = data;
+                    renderDashboard();
+                })
+                .catch(err => {
+                    dashboardContent.innerHTML = `<p style="color: #ffb3d6;">Unable to load dashboard: ${err}</p>`;
+                });
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '';
+            const dt = new Date(dateTimeString);
+            return isNaN(dt.getTime()) ? dateTimeString : dt.toLocaleString();
+        }
+
+        function renderDashboard() {
+            const type = entityType.value;
+            const query = entitySearch.value.trim().toLowerCase();
+            const items = (dashboardDataCache[type] || []).filter(item => {
+                if (!query) return true;
+                return Object.values(item).some(value => value && value.toString().toLowerCase().includes(query));
+            });
+
+            if (!items.length) {
+                dashboardContent.innerHTML = '<p>No records found.</p>';
+                return;
+            }
+
+            const keys = Object.keys(items[0]);
+            const table = document.createElement('table');
+            table.className = 'dashboard-table';
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            keys.forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+            const actionTh = document.createElement('th');
+            actionTh.textContent = 'Actions';
+            headerRow.appendChild(actionTh);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                const idField = type === 'appointments' ? 'appointmentId' : (type === 'staff' ? 'staffId' : `${type.slice(0, -1)}Id`);
+                row.dataset.id = item[idField];
+                row.dataset.type = type;
+
+                keys.forEach(key => {
+                    const td = document.createElement('td');
+                    let value = item[key];
+                    if (key.toLowerCase().includes('date')) {
+                        value = formatDateTime(value);
+                    }
+
+                    if (key.toLowerCase().includes('phone') && value) {
+                        td.innerHTML = `<a href='tel:${value}' style='color:#00dbff;text-decoration:none;'>${value}</a>`;
+                    } else {
+                        td.textContent = value != null ? value : '';
+                    }
+                    row.appendChild(td);
+                });
+
+                const actionTd = document.createElement('td');
+                const selectBtn = document.createElement('button');
+                selectBtn.textContent = 'Select';
+                selectBtn.style.cursor = 'pointer';
+                selectBtn.style.padding = '0.22rem 0.45rem';
+                selectBtn.style.border = '1px solid rgba(0, 212, 255, 0.6)';
+                selectBtn.style.borderRadius = '4px';
+                selectBtn.style.background = 'rgba(0, 212, 255, 0.1)';
+                selectBtn.style.color = '#d6faff';
+                selectBtn.addEventListener('click', () => {
+                    selectedEntity = { type, id: row.dataset.id, record: item };
+                    dashboardNotice.textContent = `Selected ${type.slice(0, -1)}: ${row.dataset.id}. Use Download or click call link.`;
+                });
+                actionTd.appendChild(selectBtn);
+                row.appendChild(actionTd);
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            dashboardContent.innerHTML = '';
+            dashboardContent.appendChild(table);
+        }
+
+        function downloadSelectedEntity() {
+            if (!selectedEntity || !selectedEntity.id) {
+                alert('Please select a record first before downloading.');
+                return;
+            }
+            const type = selectedEntity.type.replace(/s$/, '');
+            const endpoint = getEntityDetailsEndpoint(type, selectedEntity.id);
+            fetch(endpoint)
+                .then(response => response.ok ? response.json() : Promise.reject('Status ' + response.status))
+                .then(data => {
+                    const content = JSON.stringify(data, null, 2);
+                    const blob = new Blob([content], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${type}-${selectedEntity.id}-details.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    a.remove();
+                })
+                .catch(error => alert('Could not download entity details: ' + error));
+        }
+
+        function setSiriStatus(status) {
+            const statusBadge = document.getElementById('siri-status-badge');
+            const floatButton = document.getElementById('siri-float-button');
+            if (!statusBadge || !floatButton) return;
+            statusBadge.textContent = status;
+            statusBadge.style.background = status === 'Online' ? 'rgba(0, 245, 160, 0.25)' : 'rgba(255, 0, 110, 0.25)';
+            statusBadge.style.color = status === 'Online' ? '#00f5a0' : '#ff6fa0';
+            floatButton.querySelector('span').textContent = status === 'Online' ? 'SIRI AI (Ready)' : 'SIRI AI';
+        }
+
+        function setDashboardVisible(show) {
+            if (show) {
+                siriDashboard.classList.add('visible');
+                fetchDashboardData();
+                setSiriStatus('Online');
+            } else {
+                siriDashboard.classList.remove('visible');
+                setSiriStatus('Offline');
+            }
+            localStorage.setItem('siriDashboardVisible', show ? 'true' : 'false');
+        }
+
+        function restoreDashboardVisibility() {
+            const saved = localStorage.getItem('siriDashboardVisible');
+            if (saved === 'true') {
+                setDashboardVisible(true);
+            } else {
+                setDashboardVisible(false);
+            }
+        }
+
+        siriFloatButton.addEventListener('click', () => {
+            setDashboardVisible(!siriDashboard.classList.contains('visible'));
+        });
+
+        siriDashboardClose.addEventListener('click', () => {
+            setDashboardVisible(false);
+            selectedEntity = null;
+            dashboardNotice.textContent = 'Select a row to enable download/call actions.';
+        });
+
+        entityType.addEventListener('change', renderDashboard);
+        entitySearch.addEventListener('input', renderDashboard);
+        entityRefresh.addEventListener('click', fetchDashboardData);
+        downloadDetailsBtn.addEventListener('click', downloadSelectedEntity);
+
+        // Restore last open/close state, with small anim.
+        document.addEventListener('DOMContentLoaded', restoreDashboardVisibility);
     </script>
 
     <style>
