@@ -1,0 +1,142 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Production deployment for Hospital Management System - Optimized for shared link",
+  "Resources": {
+    "HospitalVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "Tags": [{"Key": "Name", "Value": "HospitalVPC"}]
+      }
+    },
+    "HospitalInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [{"Key": "Name", "Value": "HospitalIGW"}]
+      }
+    },
+    "VPCGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {"Ref": "HospitalVPC"},
+        "InternetGatewayId": {"Ref": "HospitalInternetGateway"}
+      }
+    },
+    "HospitalSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {"Ref": "HospitalVPC"},
+        "CidrBlock": "10.0.1.0/24",
+        "AvailabilityZone": "us-east-1a",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [{"Key": "Name", "Value": "HospitalSubnet"}]
+      }
+    },
+    "HospitalRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {"Ref": "HospitalVPC"},
+        "Tags": [{"Key": "Name", "Value": "HospitalRT"}]
+      }
+    },
+    "HospitalPublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "VPCGatewayAttachment",
+      "Properties": {
+        "RouteTableId": {"Ref": "HospitalRouteTable"},
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {"Ref": "HospitalInternetGateway"}
+      }
+    },
+    "SubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {"Ref": "HospitalSubnet"},
+        "RouteTableId": {"Ref": "HospitalRouteTable"}
+      }
+    },
+    "HospitalSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access on port 80 and 8080 plus SSH",
+        "VpcId": {"Ref": "HospitalVPC"},
+        "SecurityGroupIngress": [
+          {"IpProtocol": "tcp", "FromPort": 80, "ToPort": 80, "CidrIp": "0.0.0.0/0"},
+          {"IpProtocol": "tcp", "FromPort": 8080, "ToPort": 8080, "CidrIp": "0.0.0.0/0"},
+          {"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "CidrIp": "0.0.0.0/0"}
+        ],
+        "Tags": [{"Key": "Name", "Value": "HospitalSG"}]
+      }
+    },
+    "HospitalEC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t3.small",
+        "ImageId": "ami-0c7217cdde317cfec",
+        "KeyName": "hospital-production-key",
+        "SubnetId": {"Ref": "HospitalSubnet"},
+        "SecurityGroupIds": [{"Ref": "HospitalSecurityGroup"}],
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {"VolumeSize": 20, "VolumeType": "gp3"}
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "exec > /var/log/user-data.log 2>&1\n",
+                "set -x\n",
+                "yum update -y\n",
+                "yum install -y java-17-amazon-corretto-headless maven git docker\n",
+                "service docker start\n",
+                "systemctl enable docker\n",
+                "usermod -a -G docker ec2-user\n",
+                "cd /home/ec2-user\n",
+                "git clone https://github.com/nithineleti/hospital-management-system.git\n",
+                "cd hospital-management-system\n",
+                "chmod +x mvnw\n",
+                "./mvnw clean package -DskipTests\n",
+                "docker build -t hospital-app .\n",
+                "docker run -d --restart always -p 80:8080 --name hospital-container hospital-app\n"
+              ]
+            ]
+          }
+        },
+        "Tags": [{"Key": "Name", "Value": "Hospital-Production-Instance"}]
+      }
+    },
+    "HospitalElasticIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "EIPAssociation": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "InstanceId": {"Ref": "HospitalEC2Instance"},
+        "AllocationId": {"Fn::GetAtt": ["HospitalElasticIP", "AllocationId"]}
+      }
+    }
+  },
+  "Outputs": {
+    "ProductionURL": {
+      "Description": "Production Public URL to share with CEO",
+      "Value": {"Fn::Sub": "http://${HospitalElasticIP}/hospital"}
+    },
+    "InstanceID": {
+      "Description": "EC2 Instance ID",
+      "Value": {"Ref": "HospitalEC2Instance"}
+    },
+    "ElasticIP": {
+      "Description": "Public Elastic IP address",
+      "Value": {"Ref": "HospitalElasticIP"}
+    }
+  }
+}

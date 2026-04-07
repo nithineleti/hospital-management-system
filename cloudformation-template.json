@@ -1,0 +1,53 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Hospital Management System - Production Deployment",
+  "Resources": {
+    "HospitalEC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": "ami-0c7217cdde317cfec",
+        "InstanceType": "t3.medium",
+        "KeyName": "hospital-key-new",
+        "SecurityGroupIds": ["sg-0445ab2bc5f921b2b"],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash\nexec > /var/log/userdata.log 2>&1\necho 'Starting Hospital Management System deployment...'\nset -x\n\n# Update system\nyum update -y\nyum install -y java-17-amazon-corretto-headless maven git\n\n# Clone repository\ncd /opt\nsudo -u ec2-user git clone https://github.com/nithineleti/hospital-management-system.git\ncd hospital-management-system\n\n# Build the JAR\nsudo -u ec2-user mvn clean package -DskipTests 2>&1 | tee /tmp/maven-build.log\n\n# Create a systemd service\ntee /etc/systemd/system/hospital-app.service > /dev/null <<'EOF'\n[Unit]\nDescription=Hospital Management System\nAfter=network.target\nWants=network-online.target\n\n[Service]\nType=simple\nUser=ec2-user\nWorkingDirectory=/opt/hospital-management-system\nEnvironment=\"JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto\"\nExecStart=/usr/lib/jvm/java-17-amazon-corretto/bin/java -Xmx512m -Xms256m -jar target/hospital-management-system-1.0.0.jar\nRestart=on-failure\nRestartSec=10\nStandardOutput=journal\nStandardError=journal\n\n[Install]\nWantedBy=multi-user.target\nEOF\n\n# Fix permissions\nchown -R ec2-user:ec2-user /opt/hospital-management-system\n\n# Start the service\nsudo systemctl daemon-reload\nsudo systemctl enable hospital-app.service\nsudo systemctl start hospital-app.service\n\n# Wait for app to start and verify\nsleep 15\nsudo systemctl status hospital-app.service\necho 'Hospital Management System started successfully!'\n"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Hospital-Management-System"
+          }
+        ]
+      }
+    },
+    "HospitalElasticIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "InstanceId": {
+          "Ref": "HospitalEC2Instance"
+        },
+        "Domain": "vpc"
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceId": {
+      "Value": {
+        "Ref": "HospitalEC2Instance"
+      },
+      "Description": "EC2 Instance ID"
+    },
+    "PublicIP": {
+      "Value": {
+        "Ref": "HospitalElasticIP"
+      },
+      "Description": "Public Elastic IP"
+    },
+    "ApplicationURL": {
+      "Value": {
+        "Fn::Sub": "http://${HospitalElasticIP}:8080/hospital"
+      },
+      "Description": "Hospital Management System URL"
+    }
+  }
+}
