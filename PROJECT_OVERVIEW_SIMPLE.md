@@ -27,7 +27,7 @@ This is a Hospital Management System built with Spring Boot.
 - Maven
 
 ## Current Run Behavior
-- Runs on `http://localhost:8080/hospital/`
+- Runs on `http://50.19.149.95/hospital/`
 - Loads sample data automatically on startup.
 - Uses in-memory H2 database by default for quick local testing.
 
