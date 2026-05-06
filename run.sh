@@ -31,7 +31,7 @@ if ! command -v java >/dev/null 2>&1; then
 fi
 
 # Check for Java 17 (Recommended)
-JAVA_VERSION=$(java -version 2>&1 | awk 'NR==1{gsub(/"/,""); print $2}')
+JAVA_VERSION=$(java -version 2>&1 | awk 'NR==1{gsub(/"/,"",$0); print $2}')
 if [[ ! "$JAVA_VERSION" =~ ^17 ]]; then
     echo "⚠️  Note: Java 17 is recommended. Current version:"
     java -version 2>&1 | head -n 1
@@ -57,7 +57,7 @@ if [ $? -eq 0 ]; then
     if [ -n "$PORT" ]; then
         echo "📡 Using port from PORT environment variable: $PORT"
     fi
-    echo "🌐 Once started, go to: http://localhost:${PORT:-8080}/hospital/auth/login"
+    echo "🌐 Once started, go to: http://50.19.149.95/hospital/login"
     # pass IPv4 preference again when launching via Maven
     mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Djava.net.preferIPv4Stack=true"
 else
