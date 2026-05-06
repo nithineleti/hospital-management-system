@@ -1,6 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Production deployment for Hospital Management System - Optimized for shared link",
+  "Parameters": {
+    "KeyPairName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance.",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    }
+  },
   "Resources": {
     "HospitalVPC": {
       "Type": "AWS::EC2::VPC",
@@ -75,7 +82,7 @@
       "Properties": {
         "InstanceType": "t3.small",
         "ImageId": "ami-0c7217cdde317cfec",
-        "KeyName": "hospital-production-key",
+        "KeyName": { "Ref": "KeyPairName" },
         "SubnetId": {"Ref": "HospitalSubnet"},
         "SecurityGroupIds": [{"Ref": "HospitalSecurityGroup"}],
         "BlockDeviceMappings": [
