@@ -16,7 +16,7 @@ A Spring Boot based hospital management application for handling patients, docto
     *   Proactive remediation of high-severity dependency vulnerabilities.
     *   Updated `com.mysql:mysql-connector-j` to `9.1.0` and upgraded the Spring Boot baseline to `3.4.3`.
     *   Validated end-to-end run flow in local environments.
-*   **Project Optimization**: Completed a major repository cleanup (March 2026), removing 150MB+ of build artifacts and temporary files (98.5% size reduction) and archiving 78 historical documents for better maintainability.
+*   **Project Optimization**: Completed a major repository cleanup (March 2026), removing 150MB+ of build artifacts and temporary files (98.5% size reduction) and archiving 78 historical documents for reference.
 *   **Enhanced Documentation**: Added clear onboarding summaries, skill maps, and a future enhancement roadmap.
 
 ## Tech Stack
@@ -50,8 +50,8 @@ mvn clean install
 mvn spring-boot:run
 ```
 3. Open:
-- `http://localhost:8080/hospital/`
-- `http://localhost:8080/hospital/auth/login`
+- `http://50.19.149.95/hospital/`
+- `http://50.19.149.95/hospital/login`
 
 For full platform-specific instructions, see `RUN_PROJECT.md`.
 
@@ -91,11 +91,11 @@ AWS RDS (MySQL Database)
 
 Application URL
 
-http://54.159.20.178:8080/hospital
+http://50.19.149.95/hospital
 
 Login page
 
-http://54.159.20.178:8080/hospital/auth/login
+http://50.19.149.95/hospital/login
 
 ---
 
@@ -287,7 +287,7 @@ Tomcat started on port(s): 8080
 Open browser
 
 ```
-http://54.159.20.178:8080/hospital
+http://50.19.149.95/hospital
 ```
 
 Dashboard will load.
@@ -395,3 +395,5 @@ password -- 149208914@Np
    ```
    http://localhost:8081/hospital
    ```
+
+
