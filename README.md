@@ -91,11 +91,11 @@ AWS RDS (MySQL Database)
 
 Application URL
 
-http://54.159.20.178:8080/hospital
+http://50.19.149.95/hospital
 
 Login page
 
-http://54.159.20.178:8080/hospital/auth/login
+http://50.19.149.95/hospital
 
 ---
 
